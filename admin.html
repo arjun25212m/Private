@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>👑 Admin Panel</title>
+    <script src="https://unpkg.com/peerjs@1.5.1/dist/peerjs.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, 'Segoe UI', Roboto, sans-serif;
+            background: #0b0e14;
+            color: #e0e0e0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+            overflow: hidden;
+        }
+        .container {
+            background: #1a2029;
+            border-radius: 24px;
+            padding: 20px;
+            width: 100%;
+            max-width: 420px;
+            height: 96vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.8);
+            position: relative;
+            overflow: hidden;
+        }
+        h2 {
+            text-align: center;
+            font-size: 22px;
+            margin-bottom: 6px;
+            color: #e74c3c;
+            letter-spacing: 1px;
+        }
+        .subtitle {
+            text-align: center;
+            font-size: 11px;
+            color: #7a96b5;
+            margin-bottom: 10px;
+        }
+        #adminView {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7a96b5;
+            padding: 4px 0 8px 0;
+            border-bottom: 1px solid #2a3340;
+        }
+        .status-bar .online {
+            color: #28a745;
+        }
+        .room-list {
+            flex: 1;
+            background: #11161e;
+            border-radius: 16px;
+            padding: 10px;
+            overflow-y: auto;
+            margin: 8px 0;
+        }
+        .room-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 10px;
+            border-bottom: 1px solid #2a3340;
+        }
+        .room-item:last-child {
+            border-bottom: none;
+        }
+        .room-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .room-name {
+            color: #5fc3ff;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .room-users {
+            color: #7a96b5;
+            font-size: 11px;
+        }
+        .room-pass {
+            color: #6f859c;
+            font-size: 10px;
+        }
+        .btn-join {
+            background: #e74c3c;
+            border: none;
+            border-radius: 20px;
+            padding: 5px 14px;
+            color: #fff;
+            font-size: 11px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-join:active {
+            transform: scale(0.95);
+            background: #c0392b;
+        }
+        .btn-refresh {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 30px;
+            background: #2a3340;
+            color: #fff;
+            font-size: 13px;
+            cursor: pointer;
+            margin-top: 6px;
+        }
+        .btn-refresh:active {
+            background: #3d4a5c;
+        }
+        .btn-exit {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 30px;
+            background: #d9534f;
+            color: #fff;
+            font-size: 13px;
+            cursor: pointer;
+            margin-top: 6px;
+        }
+        .btn-exit:active {
+            background: #b52b27;
+        }
+        .btn-back {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 30px;
+            background: #2a3340;
+            color: #fff;
+            font-size: 13px;
+            cursor: pointer;
+            margin-top: 6px;
+        }
+        .btn-back:active {
+            background: #3d4a5c;
+        }
+        .no-rooms {
+            text-align: center;
+            color: #6f859c;
+            font-size: 13px;
+            padding: 30px 0;
+        }
+        #errorBox {
+            color: #ff6b6b;
+            font-size: 12px;
+            text-align: center;
+            margin-top: 6px;
+            min-height: 18px;
+        }
+        #chatArea {
+            display: none;
+            flex: 1;
+            flex-direction: column;
+        }
+        #roomStatus {
+            text-align: center;
+            font-size: 11px;
+            color: #7a96b5;
+            padding: 4px 0 8px 0;
+            border-bottom: 1px solid #2a3340;
+        }
+        #roomStatus span {
+            color: #5fc3ff;
+            font-weight: bold;
+        }
+        #messages {
+            flex: 1;
+            background: #11161e;
+            padding: 10px;
+            border-radius: 16px;
+            overflow-y: auto;
+            margin: 6px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            min-height: 0;
+        }
+        #messages .msg {
+            padding: 6px 12px;
+            border-radius: 16px;
+            max-width: 85%;
+            word-wrap: break-word;
+            font-size: 14px;
+            line-height: 1.4;
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        #messages .msg.me {
+            background: #1d6bb3;
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+        #messages .msg.other {
+            background: #2a3340;
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+        }
+        #messages .msg.system {
+            background: transparent;
+            color: #6f859c;
+            font-size: 11px;
+            align-self: center;
+            max-width: 100%;
+            font-style: italic;
+        }
+        #messages .msg.dev {
+            background: #2c3e50;
+            align-self: flex-start;
+            border-left: 3px solid #e74c3c;
+            color: #ecf0f1;
+        }
+        #messages .msg.dev .dev-tag {
+            color: #e74c3c;
+            font-size: 10px;
+            font-weight: bold;
+        }
+        #messages .msg-image {
+            max-width: 85%;
+            align-self: flex-start;
+            margin: 2px 0;
+            padding: 4px;
+            border-radius: 12px;
+            background: #1a2029;
+            border: 1px solid #2a3340;
+        }
+        #messages .msg-image img {
+            max-width: 200px;
+            max-height: 250px;
+            border-radius: 10px;
+            display: block;
+            margin: 0 auto;
+        }
+        #messages .msg-image .image-sender {
+            font-size: 10px;
+            color: #7a96b5;
+            margin-top: 2px;
+            text-align: center;
+        }
+        #messages .msg-image .image-caption {
+            font-size: 12px;
+            color: #a0b8d0;
+            text-align: center;
+            margin-top: 2px;
+        }
+        .msg .username-tag {
+            font-weight: bold;
+            color: #5fc3ff;
+            font-size: 12px;
+            display: block;
+            margin-bottom: 2px;
+        }
+        .msg.other .username-tag {
+            color: #f1c40f;
+        }
+        .msg.me .username-tag {
+            color: #5fc3ff;
+        }
+        .input-row {
+            display: flex;
+            gap: 6px;
+        }
+        .input-row input {
+            flex: 1;
+            padding: 10px 14px;
+            border: none;
+            border-radius: 30px;
+            background: #2a3340;
+            color: #fff;
+            font-size: 14px;
+            outline: 2px solid transparent;
+            transition: 0.3s;
+        }
+        .input-row input:focus {
+            outline-color: #4c9aff;
+            background: #1f2833;
+        }
+        .input-row .btn {
+            width: auto;
+            padding: 10px 16px;
+            border: none;
+            border-radius: 30px;
+            background: #4c9aff;
+            color: #fff;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+        }
+        .exit-row {
+            margin-top: 6px;
+            display: flex;
+            gap: 6px;
+        }
+        .exit-row .btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 30px;
+            color: #fff;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+        }
+        .exit-row .btn-danger {
+            background: #d9534f;
+        }
+        .exit-row .btn-back {
+            background: #2a3340;
+        }
+        #messages::-webkit-scrollbar {
+            width: 4px;
+        }
+        #messages::-webkit-scrollbar-track {
+            background: #11161e;
+        }
+        #messages::-webkit-scrollbar-thumb {
+            background: #3d4a5c;
+            border-radius: 10px;
+        }
+        .room-list::-webkit-scrollbar {
+            width: 4px;
+        }
+        .room-list::-webkit-scrollbar-track {
+            background: #11161e;
+        }
+        .room-list::-webkit-scrollbar-thumb {
+            background: #3d4a5c;
+            border-radius: 10px;
+        }
+        .loading-text {
+            text-align: center;
+            color: #6f859c;
+            font-size: 13px;
+            padding: 20px;
+        }
+        .status-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 4px;
+        }
+        .status-dot.online {
+            background: #28a745;
+        }
+        .status-dot.offline {
+            background: #d9534f;
+        }
+        .status-dot.connecting {
+            background: #ffc107;
+            animation: blink 0.5s infinite;
+        }
+        @keyframes blink {
+            0%,
+            100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.3;
+            }
+        }
+        .dev-tag {
+            background: #e74c3c;
+            color: #fff;
+            font-size: 9px;
+            padding: 2px 10px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-left: 6px;
+        }
+        .back-link {
+            text-align: center;
+            margin-top: 4px;
+        }
+        .back-link a {
+            color: #5f7490;
+            font-size: 11px;
+            text-decoration: none;
+            border: 1px solid #2a3340;
+            padding: 2px 12px;
+            border-radius: 20px;
+        }
+        .back-link a:active {
+            background: #2a3340;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>👑 Admin Panel <span class="dev-tag">DEV</span></h2>
+        <p class="subtitle">🔍 Monitor & Join Any Room — Silent Mode</p>
+
+        <div id="adminView">
+            <div class="status-bar">
+                <span>📡 <span id="roomCount">0</span> Active Rooms</span>
+                <span class="online">🟢 Online</span>
+            </div>
+
+            <div class="room-list" id="roomList">
+                <div class="loading-text">Loading rooms...</div>
+            </div>
+
+            <button class="btn-refresh" onclick="refreshRooms()">🔄 Refresh Rooms</button>
+            <button class="btn-exit" onclick="exitAdmin()">🚪 Exit Admin</button>
+            <div id="errorBox"></div>
+
+            <div class="back-link">
+                <a href="index.html">⬅️ Back to Chat</a>
+            </div>
+        </div>
+
+        <div id="chatArea">
+            <div id="roomStatus">
+                <span class="status-dot connecting" id="statusDot"></span>
+                Room: <span id="displayRoom"></span> &nbsp;|&nbsp; 👤 <span id="displayUser"></span>
+                <span style="color:#e74c3c; font-size:10px; margin-left:6px;">👁️ DEV</span>
+            </div>
+            <div id="messages">
+                <div class="loading-text">💬 Waiting for messages...</div>
+            </div>
+
+            <div class="input-row">
+                <input type="text" id="msgInput" placeholder="Type a message..." />
+                <button class="btn" id="sendBtn">Send</button>
+            </div>
+            <div class="exit-row">
+                <button class="btn btn-danger" id="exitBtn">🚪 Exit Room</button>
+                <button class="btn btn-back" id="backBtn">⬅️ Back</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // =============================================
+        // ADMIN PANEL - SEE ALL ROOMS + JOIN + IMAGES
+        // =============================================
+
+        const adminView = document.getElementById('adminView');
+        const chatArea = document.getElementById('chatArea');
+        const roomList = document.getElementById('roomList');
+        const roomCount = document.getElementById('roomCount');
+        const errorBox = document.getElementById('errorBox');
+        const displayRoom = document.getElementById('displayRoom');
+        const displayUser = document.getElementById('displayUser');
+        const messagesDiv = document.getElementById('messages');
+        const msgInput = document.getElementById('msgInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const exitBtn = document.getElementById('exitBtn');
+        const backBtn = document.getElementById('backBtn');
+        const statusDot = document.getElementById('statusDot');
+
+        let currentRoom = '';
+        let username = '';
+        let peer = null;
+        let connections = {};
+
+        function setStatus(status) {
+            statusDot.className = 'status-dot ' + status;
+        }
+
+        function showError(msg) {
+            errorBox.textContent = msg;
+            setTimeout(() => { if (errorBox.textContent === msg) errorBox.textContent = ''; }, 5000);
+        }
+
+        function addMessage(sender, text, isSystem = false, isDev = false) {
+            const loading = messagesDiv.querySelector('.loading-text');
+            if (loading) loading.remove();
+            const div = document.createElement('div');
+            div.className = 'msg';
+            if (isSystem) {
+                div.className = 'msg system';
+                div.textContent = text;
+            } else if (isDev) {
+                div.className = 'msg dev';
+                div.innerHTML = `<span class="dev-tag">🔍 DEV</span> ${text}`;
+            } else if (sender === username) {
+                div.className = 'msg me';
+                div.innerHTML = `<span class="username-tag">You</span> ${text}`;
+            } else {
+                div.className = 'msg other';
+                div.innerHTML = `<span class="username-tag">${sender}</span> ${text}`;
+            }
+            messagesDiv.appendChild(div);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        function addImageMessage(sender, imageData, caption = '') {
+            const loading = messagesDiv.querySelector('.loading-text');
+            if (loading) loading.remove();
+            const div = document.createElement('div');
+            div.className = 'msg-image';
+            div.innerHTML = `
+                <img src="${imageData}" alt="Image" />
+                ${caption ? `<div class="image-caption">${caption}</div>` : ''}
+                <div class="image-sender">${sender}</div>
+            `;
+            messagesDiv.appendChild(div);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        function clearMessages() {
+            messagesDiv.innerHTML = '<div class="loading-text">💬 Waiting for messages...</div>';
+        }
+
+        function getRoomData(room) {
+            const data = localStorage.getItem('room_' + room);
+            return data ? JSON.parse(data) : null;
+        }
+
+        function setRoomData(room, data) {
+            localStorage.setItem('room_' + room, JSON.stringify(data));
+        }
+
+        function deleteRoomData(room) {
+            localStorage.removeItem('room_' + room);
+        }
+
+        function refreshRooms() {
+            updateRoomList();
+        }
+
+        function updateRoomList() {
+            let html = '';
+            let count = 0;
+            for (let key in localStorage) {
+                if (key.startsWith('room_')) {
+                    const roomName = key.replace('room_', '');
+                    const data = JSON.parse(localStorage.getItem(key));
+                    const userCount = data.users ? data.users.length : 0;
+                    const passDisplay = data.password ? '🔒' : '🔓';
+                    count++;
+                    html += `
+                        <div class="room-item">
+                            <div class="room-info">
+                                <span class="room-name">🏠 ${roomName}</span>
+                                <span class="room-users">👤 ${userCount} users</span>
+                                <span class="room-pass">${passDisplay} ${data.password ? 'Password protected' : 'No password'}</span>
+                            </div>
+                            <button class="btn-join" onclick="joinRoomAsAdmin('${roomName}')">🔓 Join</button>
+                        </div>
+                    `;
+                }
+            }
+            roomList.innerHTML = html || '<div class="no-rooms">🏠 No active rooms</div>';
+            roomCount.textContent = count;
+        }
+
+        function initPeer() {
+            return new Promise((resolve) => {
+                peer = new Peer({
+                    debug: 2,
+                    config: { 'iceServers': [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun1.l.google.com:19302' }] }
+                });
+                peer.on('open', (id) => { console.log('✅ Admin Peer ID:', id);
+                    setStatus('online');
+                    resolve(id); });
+                peer.on('error', (err) => { console.error(err);
+                    showError('⚠️ ' + err.message);
+                    setStatus('offline'); });
+                peer.on('connection', (conn) => { handleConnection(conn); });
+                peer.on('disconnected', () => { setStatus('connecting');
+                    setTimeout(() => { if (peer) peer.reconnect(); }, 3000); });
+            });
+        }
+
+        function handleConnection(conn) {
+            const room = conn.metadata?.room;
+            if (!room) return;
+            connections[room] = conn;
+            conn.on('data', (data) => {
+                if (data.type === 'message') addMessage(data.sender, data.text);
+                else if (data.type === 'image') addImageMessage(data.sender, data.image, data.caption);
+                else if (data.type === 'system') addMessage('', data.text, true);
+            });
+            conn.on('close', () => { addMessage('', '🔴 User disconnected', true);
+                delete connections[room]; });
+            conn.send({ type: 'system', text: `🟢 ${username} joined the chat` });
+        }
+
+        async function joinRoomAsAdmin(roomName) {
+            const data = getRoomData(roomName);
+            if (!data) { showError('❌ Room not found'); return; }
+
+            username = '👁️ Admin_' + Math.floor(Math.random() * 1000);
+            currentRoom = roomName;
+
+            try {
+                if (!peer) await initPeer();
+
+                // Add admin to room
+                if (!data.users) data.users = [];
+                if (!data.users.includes(username)) data.users.push(username);
+                setRoomData(roomName, data);
+
+                // Load messages
+                clearMessages();
+                if (data.messages) {
+                    data.messages.forEach(msg => {
+                        if (msg.type === 'image') addImageMessage(msg.sender, msg.image, msg.caption);
+                        else addMessage(msg.sender, msg.text);
+                    });
+                }
+
+                connectToRoom(roomName);
+
+                adminView.style.display = 'none';
+                chatArea.style.display = 'flex';
+                displayRoom.textContent = roomName;
+                displayUser.textContent = username;
+                setStatus('online');
+                msgInput.focus();
+
+                addMessage('', '👁️ Admin joined as silent observer', false, true);
+
+            } catch (err) { showError('❌ ' + err.message); }
+        }
+
+        function connectToRoom(room) {
+            localStorage.setItem('peer_connect_' + room, JSON.stringify({ peerId: peer.id, username: username,
+                timestamp: Date.now() }));
+            const checkPeers = setInterval(() => {
+                const data = localStorage.getItem('peer_connect_' + room);
+                if (data) {
+                    const info = JSON.parse(data);
+                    if (info.peerId !== peer.id) {
+                        const conn = peer.connect(info.peerId, { metadata: { room: room, username: username } });
+                        connections[room] = conn;
+                        handleConnection(conn);
+                        localStorage.removeItem('peer_connect_' + room);
+                        clearInterval(checkPeers);
+                    }
+                }
+            }, 2000);
+            setTimeout(() => clearInterval(checkPeers), 10000);
+            for (let key in localStorage) {
+                if (key.startsWith('peer_connect_' + room)) {
+                    const data = localStorage.getItem(key);
+                    if (data) {
+                        const info = JSON.parse(data);
+                        if (info.peerId !== peer.id) {
+                            const conn = peer.connect(info.peerId, { metadata: { room: room, username: username } });
+                            connections[room] = conn;
+                            handleConnection(conn);
+                            localStorage.removeItem(key);
+                        }
+                    }
+                }
+            }
+        }
+
+        function sendMessage() {
+            const text = msgInput.value.trim();
+            if (!text || !currentRoom) return;
+            const roomData = getRoomData(currentRoom);
+            if (roomData) {
+                if (!roomData.messages) roomData.messages = [];
+                roomData.messages.push({ sender: username, type: 'text', text, time: Date.now() });
+                setRoomData(currentRoom, roomData);
+            }
+            for (let room in connections) {
+                if (room === currentRoom) {
+                    connections[room].send({ type: 'message', sender: username, text: text });
+                }
+            }
+            addMessage(username, text);
+            msgInput.value = '';
+            msgInput.focus();
+        }
+
+        function exitRoom() {
+            if (!currentRoom) return;
+            for (let room in connections) {
+                if (room === currentRoom) { connections[room].close();
+                    delete connections[room]; }
+            }
+            const roomData = getRoomData(currentRoom);
+            if (roomData) {
+                if (roomData.users) roomData.users = roomData.users.filter(u => u !== username);
+                if (!roomData.users || roomData.users.length === 0) deleteRoomData(currentRoom);
+                else setRoomData(currentRoom, roomData);
+            }
+            currentRoom = '';
+            username = '';
+            clearMessages();
+            adminView.style.display = 'block';
+            chatArea.style.display = 'none';
+            setStatus('offline');
+            updateRoomList();
+        }
+
+        function exitAdmin() {
+            if (currentRoom) exitRoom();
+            adminView.style.display = 'block';
+            chatArea.style.display = 'none';
+            updateRoomList();
+        }
+
+        // Event Listeners
+        sendBtn.addEventListener('click', sendMessage);
+        exitBtn.addEventListener('click', exitRoom);
+        backBtn.addEventListener('click', exitAdmin);
+
+        msgInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') { e.preventDefault();
+                sendMessage(); }
+        });
+
+        window.addEventListener('beforeunload', function() {
+            if (currentRoom) {
+                for (let room in connections) {
+                    if (room === currentRoom) { connections[room].close(); }
+                }
+            }
+        });
+
+        // Auto refresh every 5 seconds
+        setInterval(() => {
+            if (adminView.style.display !== 'none') {
+                updateRoomList();
+            }
+        }, 5000);
+
+        // Init
+        initPeer();
+        updateRoomList();
+
+        console.log('👑 Admin Panel Loaded!');
+        console.log('🔍 You can see and join any room silently!');
+        console.log('📸 Images are also visible!');
+    </script>
+
+</body>
+</html>
