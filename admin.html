@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>👑 Admin Panel</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, 'Segoe UI', Roboto, sans-serif;
+            background: #0b141a;
+            color: #e9edef;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        #adminLogin {
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #0b141a;
+            padding: 20px;
+        }
+
+        .login-box {
+            background: #1f2c33;
+            border-radius: 28px;
+            padding: 40px 30px;
+            width: 100%;
+            max-width: 380px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+        }
+
+        .login-box .logo {
+            text-align: center;
+            font-size: 48px;
+            margin-bottom: 4px;
+        }
+
+        .login-box h2 {
+            text-align: center;
+            font-size: 22px;
+            color: #e9edef;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .login-box .sub {
+            text-align: center;
+            font-size: 13px;
+            color: #8696a0;
+            margin-bottom: 20px;
+        }
+
+        .login-box .badge {
+            display: inline-block;
+            background: #00a884;
+            color: #fff;
+            font-size: 10px;
+            padding: 2px 12px;
+            border-radius: 20px;
+            margin-left: 6px;
+        }
+
+        .login-box .form-group {
+            margin-bottom: 14px;
+        }
+
+        .login-box label {
+            display: block;
+            font-size: 12px;
+            color: #8696a0;
+            margin-bottom: 4px;
+            font-weight: 500;
+        }
+
+        .login-box input {
+            width: 100%;
+            padding: 12px 16px;
+            border: none;
+            border-radius: 12px;
+            background: #2a3942;
+            color: #e9edef;
+            font-size: 15px;
+            outline: 2px solid transparent;
+            transition: 0.3s;
+        }
+
+        .login-box input:focus {
+            outline-color: #00a884;
+            background: #1f2c33;
+        }
+
+        .login-box .btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            background: #00a884;
+            color: #fff;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-top: 8px;
+        }
+
+        .login-box .btn:active {
+            transform: scale(0.97);
+            background: #008f72;
+        }
+
+        .login-box .error {
+            color: #ff6b6b;
+            font-size: 13px;
+            text-align: center;
+            margin-top: 10px;
+            min-height: 20px;
+        }
+
+        .login-box .back-link {
+            text-align: center;
+            margin-top: 14px;
+        }
+
+        .login-box .back-link a {
+            color: #5e6f7a;
+            font-size: 12px;
+            text-decoration: none;
+        }
+
+        #adminDashboard {
+            display: none;
+            height: 100vh;
+            flex-direction: column;
+            background: #0b141a;
+        }
+
+        .admin-header {
+            background: #1f2c33;
+            padding: 14px 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #2a3942;
+            flex-shrink: 0;
+        }
+
+        .admin-header .title {
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        .admin-header .title .badge {
+            background: #00a884;
+            font-size: 10px;
+            padding: 2px 10px;
+            border-radius: 20px;
+            margin-left: 6px;
+        }
+
+        .admin-header .actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .admin-header .actions button {
+            background: transparent;
+            border: none;
+            color: #8696a0;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 8px;
+            transition: 0.2s;
+        }
+
+        .admin-header .actions button:active {
+            background: #2a3942;
+        }
+
+        .admin-header .actions .logout-btn {
+            color: #d9534f;
+        }
+
+        .stats {
+            display: flex;
+            gap: 12px;
+            padding: 10px 18px;
+            background: #1f2c33;
+            border-bottom: 1px solid #2a3942;
+            flex-shrink: 0;
+            flex-wrap: wrap;
+        }
+
+        .stats .stat-item {
+            font-size: 13px;
+            color: #8696a0;
+        }
+
+        .stats .stat-item span {
+            color: #e9edef;
+            font-weight: 600;
+        }
+
+        #roomList {
+            flex: 1;
+            padding: 10px 14px;
+            overflow-y: auto;
+            min-height: 0;
+        }
+
+        .room-card {
+            background: #1f2c33;
+            border-radius: 14px;
+            padding: 14px 16px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: 0.2s;
+            border: 1px solid transparent;
+            cursor: pointer;
+        }
+
+        .room-card:active {
+            transform: scale(0.99);
+            background: #2a3942;
+        }
+
+        .room-card .info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .room-card .info .name {
+            font-size: 15px;
+            font-weight: 500;
+            color: #e9edef;
+        }
+
+        .room-card .info .details {
+            font-size: 12px;
+            color: #8696a0;
+            margin-top: 2px;
+        }
+
+        .room-card .info .details .dot {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #00a884;
+            margin-right: 4px;
+        }
+
+        .room-card .join-btn {
+            background: #8e44ad;
+            border: none;
+            border-radius: 20px;
+            padding: 6px 18px;
+            color: #fff;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.2s;
+            flex-shrink: 0;
+            margin-left: 10px;
+        }
+
+        .room-card .join-btn:active {
+            transform: scale(0.95);
+            background: #6c3483;
+        }
+
+        .no-rooms {
+            text-align: center;
+            color: #8696a0;
+            font-size: 14px;
+            padding: 40px 0;
+        }
+
+        .loading-text {
+            text-align: center;
+            color: #8696a0;
+            font-size: 13px;
+            padding: 30px 0;
+        }
+
+        #roomList::-webkit-scrollbar {
+            width: 4px;
+        }
+        #roomList::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        #roomList::-webkit-scrollbar-thumb {
+            background: #2a3942;
+            border-radius: 10px;
+        }
+
+        @media (max-width: 480px) {
+            .login-box {
+                padding: 30px 20px;
+            }
+            .admin-header {
+                padding: 10px 14px;
+            }
+            .admin-header .title {
+                font-size: 15px;
+            }
+            .stats {
+                padding: 8px 14px;
+                gap: 8px;
+            }
+            .stats .stat-item {
+                font-size: 11px;
+            }
+            .room-card {
+                padding: 10px 12px;
+            }
+            .room-card .info .name {
+                font-size: 13px;
+            }
+            .room-card .join-btn {
+                padding: 4px 14px;
+                font-size: 11px;
+            }
+            #roomList {
+                padding: 6px 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="adminLogin">
+        <div class="login-box">
+            <div class="logo">👑</div>
+            <h2>Admin Panel <span class="badge">DEV</span></h2>
+            <p class="sub">Monitor & join any room</p>
+
+            <div class="form-group">
+                <label>🔑 Admin Password</label>
+                <input type="password" id="adminPass" placeholder="Enter admin password..." />
+            </div>
+
+            <button class="btn" id="adminLoginBtn">Login</button>
+            <div class="error" id="errorBox"></div>
+
+            <div class="back-link">
+                <a href="index.html">⬅️ Back to Chat</a>
+            </div>
+        </div>
+    </div>
+
+    <div id="adminDashboard">
+
+        <div class="admin-header">
+            <div class="title">👑 Admin <span class="badge">DEV</span></div>
+            <div class="actions">
+                <button onclick="refreshRooms()" title="Refresh">🔄</button>
+                <button class="logout-btn" onclick="logoutAdmin()" title="Logout">🚪</button>
+            </div>
+        </div>
+
+        <div class="stats">
+            <div class="stat-item">📡 Active Rooms: <span id="roomCount">0</span></div>
+            <div class="stat-item">👥 Total Users: <span id="userCount">0</span></div>
+            <div class="stat-item">🟢 Status: <span style="color:#00a884;">Online</span></div>
+        </div>
+
+        <div id="roomList">
+            <div class="loading-text">Loading rooms...</div>
+        </div>
+
+    </div>
+
+    <script>
+        // ============================================================
+        // ADMIN PANEL - ONLY ACTIVE ROOMS
+        // ============================================================
+
+        const ADMIN_PASSWORD = 'admin123';
+
+        const adminLogin = document.getElementById('adminLogin');
+        const adminDashboard = document.getElementById('adminDashboard');
+        const adminPassInput = document.getElementById('adminPass');
+        const adminLoginBtn = document.getElementById('adminLoginBtn');
+        const roomList = document.getElementById('roomList');
+        const roomCount = document.getElementById('roomCount');
+        const userCount = document.getElementById('userCount');
+        const errorBox = document.getElementById('errorBox');
+
+        let isAdmin = false;
+
+        function showError(msg) {
+            errorBox.textContent = msg;
+            setTimeout(() => {
+                if (errorBox.textContent === msg) errorBox.textContent = '';
+            }, 5000);
+        }
+
+        function adminLoginFunc() {
+            const pass = adminPassInput.value.trim();
+
+            if (!pass) {
+                showError('❌ Please enter admin password');
+                return;
+            }
+
+            if (pass !== ADMIN_PASSWORD) {
+                showError('❌ Wrong password!');
+                adminPassInput.value = '';
+                adminPassInput.focus();
+                return;
+            }
+
+            isAdmin = true;
+            adminLogin.style.display = 'none';
+            adminDashboard.style.display = 'flex';
+            refreshRooms();
+
+            if (window.roomInterval) clearInterval(window.roomInterval);
+            window.roomInterval = setInterval(refreshRooms, 5000);
+        }
+
+        function logoutAdmin() {
+            isAdmin = false;
+            if (window.roomInterval) {
+                clearInterval(window.roomInterval);
+                window.roomInterval = null;
+            }
+            adminLogin.style.display = 'flex';
+            adminDashboard.style.display = 'none';
+            adminPassInput.value = '';
+            errorBox.textContent = '';
+            roomList.innerHTML = '<div class="loading-text">Loading rooms...</div>';
+        }
+
+        // ============ GET ACTIVE ROOMS ONLY ============
+        function getActiveRooms() {
+            const rooms = [];
+            let totalUsers = 0;
+
+            // Check server for active rooms
+            // We use localStorage as source of truth
+            for (let key in localStorage) {
+                if (key.startsWith('room_')) {
+                    try {
+                        const data = JSON.parse(localStorage.getItem(key));
+                        const roomName = key.replace('room_', '');
+                        // Only show rooms that have users
+                        if (data.users && data.users.length > 0) {
+                            const userCount = data.users.length;
+                            totalUsers += userCount;
+                            rooms.push({
+                                name: roomName,
+                                users: data.users || [],
+                                userCount: userCount,
+                                password: data.password || 'No password',
+                                active: true
+                            });
+                        } else {
+                            // Clean up empty rooms
+                            localStorage.removeItem(key);
+                        }
+                    } catch (e) {}
+                }
+            }
+
+            return { rooms, totalUsers };
+        }
+
+        function refreshRooms() {
+            if (!isAdmin) return;
+
+            const { rooms, totalUsers } = getActiveRooms();
+
+            roomCount.textContent = rooms.length;
+            userCount.textContent = totalUsers;
+
+            if (rooms.length === 0) {
+                roomList.innerHTML = '<div class="no-rooms">🏠 No active rooms</div>';
+                return;
+            }
+
+            let html = '';
+            rooms.forEach(room => {
+                const userList = room.users.length > 0 ? room.users.join(', ') : 'No users';
+                html += `
+                    <div class="room-card" onclick="joinRoomDirect('${room.name}', '${room.password}')">
+                        <div class="info">
+                            <div class="name">🏠 ${room.name}</div>
+                            <div class="details">
+                                <span class="dot"></span>
+                                👤 ${room.userCount} users &nbsp;|&nbsp; 🔒 ${room.password}
+                            </div>
+                        </div>
+                        <button class="join-btn">🔓 Join</button>
+                    </div>
+                `;
+            });
+
+            roomList.innerHTML = html;
+        }
+
+        function joinRoomDirect(roomName, password) {
+            if (!isAdmin) return;
+
+            const adminName = '👁️ Admin_' + Math.floor(Math.random() * 1000);
+
+            try {
+                const data = JSON.parse(localStorage.getItem('room_' + roomName));
+                if (data) {
+                    if (!data.users) data.users = [];
+                    if (!data.users.includes(adminName)) {
+                        data.users.push(adminName);
+                        localStorage.setItem('room_' + roomName, JSON.stringify(data));
+                    }
+                }
+            } catch (e) {}
+
+            const url = 'index.html?room=' + encodeURIComponent(roomName) +
+                '&pass=' + encodeURIComponent(password) +
+                '&name=' + encodeURIComponent(adminName);
+
+            window.location.href = url;
+        }
+
+        adminLoginBtn.addEventListener('click', adminLoginFunc);
+
+        adminPassInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') adminLoginFunc();
+        });
+
+        const params = new URLSearchParams(window.location.search);
+        const room = params.get('room');
+        const pass = params.get('pass');
+        const name = params.get('name');
+
+        if (room && pass && name) {
+            sessionStorage.setItem('chat_room', room);
+            sessionStorage.setItem('chat_user', name);
+            sessionStorage.setItem('chat_pass', pass);
+            window.location.href = 'index.html';
+        }
+
+        console.log('👑 Admin Panel Loaded!');
+        console.log('🔑 Admin Password:', ADMIN_PASSWORD);
+        console.log('📡 Only active rooms shown!');
+    </script>
+
+</body>
+</html>
